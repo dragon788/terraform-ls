@@ -1,6 +1,8 @@
 package filesystem
 
 import (
+	"os"
+
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/terraform-ls/internal/source"
 )
@@ -38,4 +40,21 @@ type DocumentStorage interface {
 	GetDocument(DocumentHandler) (Document, error)
 	CloseAndRemoveDocument(DocumentHandler) error
 	ChangeDocument(VersionedDocumentHandler, DocumentChanges) error
+}
+
+type Filesystem interface {
+	DocumentStorage
+
+	// direct FS methods
+	ReadFile(name string) ([]byte, error)
+	ReadDir(name string) ([]os.FileInfo, error)
+	Open(name string) (File, error)
+}
+
+// See http://golang.org/s/draft-iofs-design
+// TODO: Replace with io/fs.File when available
+type File interface {
+	Stat() (os.FileInfo, error)
+	Read([]byte) (int, error)
+	Close() error
 }
